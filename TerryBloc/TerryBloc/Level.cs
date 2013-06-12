@@ -328,6 +328,14 @@ namespace TerryBloc
         }
 
         /// <summary>
+        /// Vérifie si un joueur est présent sur le bloc
+        /// </summary>
+        private bool HasPlayerBloc(int X, int Y)
+        {
+            return Joueurs.Any(b => b.PosX == X && b.PosY == Y);
+        }
+
+        /// <summary>
         /// Récupère un bloc plein
         /// </summary>
         /// <param name="X">Position en X</param>
@@ -346,14 +354,6 @@ namespace TerryBloc
         private PlayerBloc GetPlayerBloc(short pJoueur)
         {
             return Joueurs.FirstOrDefault(b => b.NumJoueur == pJoueur);
-        }
-
-        /// <summary>
-        /// Vérifie si un joueur est présent sur le bloc
-        /// </summary>
-        private bool HasPlayerBloc(int X, int Y)
-        {
-            return Joueurs.Any(b => b.PosX == X && b.PosY == Y);
         }
     }
 }
