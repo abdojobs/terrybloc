@@ -20,14 +20,14 @@ namespace TerryBloc
         public void LoadContent(ContentManager content)
         {
             base.LoadContent(content, "PlayerBloc");
-            Position = new Vector2(PosX * 50 + (25 - Texture.Width / 2), PosY * 50 + (25 - Texture.Height / 2));
+            Position = new Vector2(PosX * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Width / 2), PosY * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Height / 2));
         }
 
         public override void SetPosition(int X, int Y)
         {
             PosX = X;
             PosY = Y;
-            Position = new Vector2(PosX * 50 + (25 - Texture.Width / 2), PosY * 50 + (25 - Texture.Height / 2));
+            Position = new Vector2(PosX * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Width / 2), PosY * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Height / 2));
         }
     }
 }

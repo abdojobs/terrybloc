@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 
 namespace TerryBloc
 {
@@ -29,7 +22,12 @@ namespace TerryBloc
 
         public Terrybloc()
         {
-            graphics = new GraphicsDeviceManager(this) { PreferredBackBufferHeight = 400, PreferredBackBufferWidth = 400 };
+            graphics = new GraphicsDeviceManager(this)
+            {
+                PreferredBackBufferHeight = 400,
+                PreferredBackBufferWidth = 900,
+
+            };
             Content.RootDirectory = "Content";
         }
 

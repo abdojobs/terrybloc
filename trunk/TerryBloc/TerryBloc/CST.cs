@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using System.IO;
+﻿using System.IO;
+using System.Reflection;
 namespace TerryBloc
 {
     public class CST
@@ -14,5 +14,7 @@ namespace TerryBloc
         /// Dossier contenant les niveaux
         /// </summary>
         public static string PATH_LEVEL = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Content\\Levels\\");
+
+        public const int LARGEUR_BLOC = 50;
     }
 }
