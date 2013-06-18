@@ -9,7 +9,7 @@ namespace TerryBloc
     /// </summary>
     public class PlayerBloc : Sprite
     {
-        public short NumJoueur;
+        public short NumJoueur { get; private set; }
 
         public PlayerBloc(int X, int Y, short Joueur = 1)
             : base(X, Y)
@@ -20,14 +20,16 @@ namespace TerryBloc
         public void LoadContent(ContentManager content)
         {
             base.LoadContent(content, "PlayerBloc");
-            Position = new Vector2(PosX * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Width / 2), PosY * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Height / 2));
+            base.Position = GetPositionVoulu();
         }
 
-        public override void SetPosition(int X, int Y)
+        /// <summary>
+        /// Donne la position voulu 
+        /// </summary>
+        /// <returns></returns>
+        public override Vector2 GetPositionVoulu()
         {
-            PosX = X;
-            PosY = Y;
-            Position = new Vector2(PosX * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Width / 2), PosY * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Height / 2));
+            return new Vector2(PosX * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Width / 2) + CST.DECALAGE_PLAINBLOC, PosY * CST.LARGEUR_BLOC + (CST.LARGEUR_BLOC / 2 - Texture.Height / 2) + CST.DECALAGE_PLAYEUR);
         }
     }
 }

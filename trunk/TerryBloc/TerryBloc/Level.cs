@@ -11,6 +11,9 @@ namespace TerryBloc
 {
     public class Level
     {
+        private TypeDeplacement _MovingType { get; set; }
+        private bool _DeplacementJoueurSeul { get; set; }
+
         public SpriteFont WIN;
 
         /// <summary>
@@ -21,7 +24,7 @@ namespace TerryBloc
         /// <summary>
         /// Nombre de joueurs possible dans le niveau
         /// </summary>
-        public int NbJoueurs() { return Joueurs.Count; }
+        public int NbJoueurs { get { return Joueurs.Count; } }
 
         /// <summary>
         /// true si un joueur est arrivé ; false sinon
@@ -64,6 +67,10 @@ namespace TerryBloc
 
             foreach (Bloc b in Plateau)
                 b.Initialize();
+            foreach (PlainBloc pb in Movers)
+                pb.Initialize();
+            foreach (PlayerBloc pb in Joueurs)
+                pb.Initialize();
         }
 
         /// <summary>
@@ -177,6 +184,34 @@ namespace TerryBloc
                 pb.Update(gameTime);
             foreach (PlayerBloc pb in Joueurs)
                 pb.Update(gameTime);
+
+            var pBloc = GetPlayerBloc(_CurrentPlayer);
+            if (!_FinJeu && !pBloc.InMoving && _MovingType != TypeDeplacement.None && !_DeplacementJoueurSeul)
+            {
+                bool OnlyPlayeur = false;
+                if (IsDeplacementPossible(_MovingType, out OnlyPlayeur, true))
+                    MoveBloc(_MovingType, OnlyPlayeur);
+                else
+                {
+                    if (HasEndBloc(pBloc.PosX, pBloc.PosY))
+                        _FinJeu = true;
+                    else
+                        ChangementJoueur();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Change le joueur courant
+        /// </summary>
+        private void ChangementJoueur()
+        {
+            if (_CurrentPlayer == NbJoueurs)
+                _CurrentPlayer = 1;
+            else
+                _CurrentPlayer++;
+
+            _MovingType = TypeDeplacement.None;
         }
 
         /// <summary>
@@ -185,96 +220,96 @@ namespace TerryBloc
         /// <param name="keyboardState"></param>
         public void HandleInput(KeyboardState keyboardState)
         {
-            var stop = false;
-            var deplacement = false;
             var pBloc = GetPlayerBloc(_CurrentPlayer);
+            if (pBloc.InMoving || _FinJeu)
+                return;
 
-            if (!_FinJeu)
+            bool OnlyPlayeur = false;
+            if (IsKeyPress(keyboardState, Keys.Down) && IsDeplacementPossible(TypeDeplacement.Bas, out OnlyPlayeur))
+                _MovingType = TypeDeplacement.Bas;
+            if (IsKeyPress(keyboardState, Keys.Up) && IsDeplacementPossible(TypeDeplacement.Haut, out OnlyPlayeur))
+                _MovingType = TypeDeplacement.Haut;
+            if (IsKeyPress(keyboardState, Keys.Left) && IsDeplacementPossible(TypeDeplacement.Gauche, out OnlyPlayeur))
+                _MovingType = TypeDeplacement.Gauche;
+            if (IsKeyPress(keyboardState, Keys.Right) && IsDeplacementPossible(TypeDeplacement.Droite, out OnlyPlayeur))
+                _MovingType = TypeDeplacement.Droite;
+
+            if (_MovingType != TypeDeplacement.None)
             {
-                if (keyboardState.IsKeyDown(Keys.Down) && _oldKeyboardState.IsKeyUp(Keys.Down))
-                {
-                    do
-                    {
-                        stop = GestionPosition(pBloc, pBloc.PosX, pBloc.PosY + 1, ref deplacement);
-                    } while (!stop);
-                }
-                if (keyboardState.IsKeyDown(Keys.Up) && _oldKeyboardState.IsKeyUp(Keys.Up))
-                {
-                    do
-                    {
-                        stop = GestionPosition(pBloc, pBloc.PosX, pBloc.PosY - 1, ref deplacement);
-                    } while (!stop);
-                }
-                if (keyboardState.IsKeyDown(Keys.Left) && _oldKeyboardState.IsKeyUp(Keys.Left))
-                {
-                    do
-                    {
-                        stop = GestionPosition(pBloc, pBloc.PosX - 1, pBloc.PosY, ref deplacement);
-                    } while (!stop);
-                }
-                if (keyboardState.IsKeyDown(Keys.Right) && _oldKeyboardState.IsKeyUp(Keys.Right))
-                {
-                    do
-                    {
-                        stop = GestionPosition(pBloc, pBloc.PosX + 1, pBloc.PosY, ref deplacement);
-                    } while (!stop);
-                }
-
-                if (deplacement)
-                {
-                    if (HasEndBloc(pBloc.PosX, pBloc.PosY))
-                        _FinJeu = true;
-                    else
-                        ChangementJoueur();
-                }
+                _DeplacementJoueurSeul = OnlyPlayeur;
+                MoveBloc(_MovingType, OnlyPlayeur);
             }
+
             _oldKeyboardState = keyboardState;
         }
 
         /// <summary>
-        /// Change le joueur courant
+        /// Vérifie qu'un déplacement est possible
         /// </summary>
-        private void ChangementJoueur()
+        /// <param name="typeDeplacement">type de déplacement</param>
+        /// <param name="inmoving">Le joueur était-il déjà en déplacement</param>
+        /// <returns></returns>
+        private bool IsDeplacementPossible(TypeDeplacement typeDeplacement, out bool OnlyPlayeur, bool inmoving = false)
         {
-            if (_CurrentPlayer == NbJoueurs())
-                _CurrentPlayer = 1;
-            else
-                _CurrentPlayer++;
+            OnlyPlayeur = false;
+            var X = GetPlayerBloc(_CurrentPlayer).PosX;
+            var Y = GetPlayerBloc(_CurrentPlayer).PosY;
+
+            switch (typeDeplacement)
+            {
+                case TypeDeplacement.Haut:
+                    Y--;
+                    break;
+                case TypeDeplacement.Bas:
+                    Y++;
+                    break;
+                case TypeDeplacement.Gauche:
+                    X--;
+                    break;
+                case TypeDeplacement.Droite:
+                    X++;
+                    break;
+            }
+
+            if (!HasBloc(X, Y))
+                return false;
+
+            var plainBloc = GetPlainBloc(X, Y);
+            if (plainBloc == null)
+                return true;
+
+            if (HasPlayerBloc(X, Y) || inmoving)
+                return false;
+
+            OnlyPlayeur = true;
+            return true;
         }
 
         /// <summary>
-        /// Gestion de la position
+        /// Vérifie qu'une touche est appuyée mais pas maintenue
         /// </summary>
-        /// <param name="pBloc"></param>
-        /// <param name="X"></param>
-        /// <param name="Y"></param>
-        /// <param name="deplacement"></param>
-        /// <returns></returns>
-        private bool GestionPosition(PlayerBloc pBloc, int X, int Y, ref bool deplacement)
+        /// <param name="keyboardState">Etat actuel du clavier</param>
+        /// <param name="keys">touche appuyée</param>
+        /// <returns>true si déclenchement possible ; false sinon</returns>
+        private bool IsKeyPress(KeyboardState keyboardState, Keys keys)
         {
-            var stop = false;
+            return keyboardState.IsKeyDown(keys) && _oldKeyboardState.IsKeyUp(keys);
+        }
 
-            if (HasBloc(X, Y))
-            {
-                var plainBloc = GetPlainBloc(X, Y);
-                if (plainBloc == null)
-                {
-                    GetPlainBloc(pBloc.PosX, pBloc.PosY).SetPosition(X, Y);
-                    pBloc.SetPosition(X, Y);
-                    deplacement = true;
-                }
-                else if (!deplacement && !HasPlayerBloc(X, Y))
-                {
-                    pBloc.SetPosition(X, Y);
-                    stop = true;
-                }
-                else
-                    stop = true;
-            }
+        /// <summary>
+        /// Déplace le joueur et son bloc
+        /// </summary>
+        /// <param name="MovingType"></param>
+        private void MoveBloc(TypeDeplacement MovingType, bool OnlyPlayeur)
+        {
+            var pBloc = GetPlayerBloc(_CurrentPlayer);
+
+            if (OnlyPlayeur)
+                _MovingType = TypeDeplacement.None;
             else
-                stop = true;
+                GetPlainBloc(pBloc.PosX, pBloc.PosY).Move(MovingType);
 
-            return stop;
+            pBloc.Move(MovingType);
         }
 
         /// <summary>
