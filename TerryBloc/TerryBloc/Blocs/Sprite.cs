@@ -69,6 +69,17 @@ namespace TerryBloc
         }
         private int _posY;
 
+        /// <summary>
+        /// Indique si le sprite est en mouvement
+        /// </summary>
+        public bool InMoving
+        {
+            get { return _inMoving; }
+        }
+        private bool _inMoving;
+        private TypeDeplacement _movingType;
+        private Vector2 _arrivee;
+
         #endregion Properties
 
         #region Methods
@@ -80,6 +91,7 @@ namespace TerryBloc
         /// <param name="posY"></param>
         public Sprite(int X, int Y)
         {
+            _inMoving = false;
             _posX = X;
             _posY = Y;
         }
@@ -91,7 +103,7 @@ namespace TerryBloc
         {
             _position = Vector2.Zero;
             _direction = Vector2.Zero;
-            _speed = 0;
+            _speed = 0.5f;
         }
 
         /// <summary>
@@ -111,7 +123,45 @@ namespace TerryBloc
         /// <param name="gameTime">Le GameTime associé à la frame</param>
         public virtual void Update(GameTime gameTime)
         {
+            CheckPosition();
             _position += _direction * _speed * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+        }
+
+        /// <summary>
+        /// Vérifie et stoppe le déplacement de l'objet s'il a atteint son but
+        /// </summary>
+        private void CheckPosition()
+        {
+            if (_inMoving)
+            {
+                bool fin = false;
+                switch (_movingType)
+                {
+                    case TypeDeplacement.Haut:
+                        if (_position.Y <= _arrivee.Y)
+                            fin = true;
+                        break;
+                    case TypeDeplacement.Bas:
+                        if (_position.Y >= _arrivee.Y)
+                            fin = true;
+                        break;
+                    case TypeDeplacement.Gauche:
+                        if (_position.X <= _arrivee.X)
+                            fin = true;
+                        break;
+                    case TypeDeplacement.Droite:
+                        if (_position.X >= _arrivee.X)
+                            fin = true;
+                        break;
+                }
+                if (fin)
+                {
+                    _inMoving = false;
+                    _movingType = TypeDeplacement.None;
+                    _arrivee = Vector2.Zero;
+                    _direction = Vector2.Zero;
+                }
+            }
         }
 
         /// <summary>
@@ -133,15 +183,42 @@ namespace TerryBloc
         }
 
         /// <summary>
-        /// 
+        /// Déplace le joueur à un emplacement défini par le MovingType
         /// </summary>
-        /// <param name="X"></param>
-        /// <param name="Y"></param>
-        public virtual void SetPosition(int X, int Y)
+        /// <param name="MovingType"></param>
+        public virtual void Move(TypeDeplacement MovingType)
         {
-            _posX = X;
-            _posY = Y;
-            _position = new Vector2(_posX * Texture.Width, _posY * Texture.Height);
+            _inMoving = true;
+            _movingType = MovingType;
+            switch (_movingType)
+            {
+                case TypeDeplacement.Haut:
+                    _direction = -Vector2.UnitY;
+                    _posY--;
+                    break;
+                case TypeDeplacement.Bas:
+                    _direction = Vector2.UnitY;
+                    _posY++;
+                    break;
+                case TypeDeplacement.Gauche:
+                    _direction = -Vector2.UnitX;
+                    _posX--;
+                    break;
+                case TypeDeplacement.Droite:
+                    _direction = Vector2.UnitX;
+                    _posX++;
+                    break;
+            }
+            _arrivee = GetPositionVoulu();
+        }
+
+        /// <summary>
+        /// Donne la position voulu 
+        /// </summary>
+        /// <returns></returns>
+        public virtual Vector2 GetPositionVoulu()
+        {
+            return new Vector2(_posX * Texture.Width, _posY * Texture.Height);
         }
 
         #endregion Methods

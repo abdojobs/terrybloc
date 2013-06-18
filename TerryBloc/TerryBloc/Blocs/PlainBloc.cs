@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Content;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace TerryBloc
 {
@@ -8,13 +9,19 @@ namespace TerryBloc
             : base(X, Y)
         { }
 
-        public override void Initialize()
-        {
-        }
-
         public void LoadContent(ContentManager content)
         {
             base.LoadContent(content, "PlainBloc");
+            base.Position = GetPositionVoulu();
+        }
+
+        /// <summary>
+        /// Donne la position voulu 
+        /// </summary>
+        /// <returns></returns>
+        public override Vector2 GetPositionVoulu()
+        {
+            return new Vector2(PosX * CST.LARGEUR_BLOC + CST.DECALAGE_PLAINBLOC, PosY * CST.LARGEUR_BLOC + CST.DECALAGE_PLAINBLOC);
         }
     }
 }
