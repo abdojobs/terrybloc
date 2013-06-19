@@ -18,7 +18,11 @@ Pour les joueurs voulant se mesurer directement les uns aux autres sur le même 
 == En ligne ==
 
 == Éditeur ==
-
+Comme le dirait une personne connu : 
+{{{
+L’imagination gouverne le monde.
+}}}
+Et Napoléon avait bien raison, ce jeu a, dans un premier temps était penser pour faire réfléchir les joueurs mais aussi pour faire travailler leur imagination. L'éditeur de niveau vous permettra donc ici de laisser libre cours à celle-ci.
 
 = But du jeu =
 Suivant le mode de jeu choisi, voici les différents buts du jeu
